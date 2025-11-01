@@ -1,0 +1,33 @@
+# Core Framework
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
+pydantic-settings
+
+# LangChain Ecosystem
+langchain
+langchain-google-genai
+langchain-community
+langchain-postgres
+
+# Google APIs
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+
+# Database
+prisma
+psycopg2-binary
+pgvector
+
+# Utilities
+python-multipart
+aiofiles
+httpx
+tiktoken
+
+# CORS & Auth
+python-jose[cryptography]
+passlib[bcrypt]

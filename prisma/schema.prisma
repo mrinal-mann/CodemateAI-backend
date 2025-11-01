@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider             = "prisma-client-py"
+  previewFeatures      = ["postgresqlExtensions"]
+  interface            = "asyncio"
+  recursive_type_depth = 5
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  googleId     String        @unique
+  name         String?
+  avatar       String?
+  accessToken  String?       @db.Text
+  refreshToken String?       @db.Text
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  documents    Document[]
+  chatSessions ChatSession[]
+}
+
+model Document {
+  id          String          @id @default(cuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  googleDocId String          @unique
+  title       String
+  type        DocumentType
+  content     String          @db.Text
+  metadata    Json?
+  isProcessed Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  chunks      DocumentChunk[]
+
+  @@index([userId])
+  @@index([googleDocId])
+}
+
+model DocumentChunk {
+  id         String                      @id @default(cuid())
+  documentId String
+  document   Document                    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  content    String                      @db.Text
+  embedding  Unsupported("vector(768)")? // Google embedding dimension
+  chunkIndex Int
+  metadata   Json?
+  createdAt  DateTime                    @default(now())
+
+  @@index([documentId])
+  @@index([documentId, chunkIndex])
+}
+
+model ChatSession {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String        @default("New Chat")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  messages  ChatMessage[]
+
+  @@index([userId])
+}
+
+model ChatMessage {
+  id        String      @id @default(cuid())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      MessageRole
+  content   String      @db.Text
+  sources   Json?
+  createdAt DateTime    @default(now())
+
+  @@index([sessionId])
+}
+
+enum DocumentType {
+  DOCS
+  SHEETS
+  SLIDES
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
