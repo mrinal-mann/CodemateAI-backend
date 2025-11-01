@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     JWT_EXPIRATION_MINUTES: int = 10080  # 7 days
     
     # Frontend URL
-    FRONTEND_URL: str = "http://localhost:8000"
+    FRONTEND_URL: str = "https://codemate-ai-frontend.vercel.app/",
     
     # Environment
     ENVIRONMENT: str = "development"
